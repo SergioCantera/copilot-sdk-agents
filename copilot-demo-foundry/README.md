@@ -68,6 +68,24 @@ reuse the same Copilot session:
 The Invocations protocol is bytes-in/bytes-out; this project defines the JSON
 contract above and publishes it at `/openapi.json`.
 
+## Container build
+
+The container listens on port `8088`, which is the default port used by the
+Foundry hosted-agent deployment workflow:
+
+```bash
+docker build -t copilot-demo-foundry:local .
+docker run --rm -p 8088:8088 \
+  -e MODEL_BACKEND=github \
+  copilot-demo-foundry:local
+```
+
+The container still requires a non-interactive Copilot authentication
+configuration at runtime. Do not copy a developer's local Copilot credentials
+into the image. The `azure.yaml` service is prepared for remote ACR builds, but
+Azure provisioning and deployment require a selected Foundry project and are
+not performed by this local phase.
+
 The local hook allowlist currently permits only `get_weather` as an application
 tool. MCP tools are configured separately and should be explicitly reviewed
 before being enabled.

@@ -1,0 +1,19 @@
+name: copilot-demo-foundry
+
+services:
+  copilot-orchestrator:
+    project: .
+    host: azure.ai.agent
+    language: docker
+    kind: hosted
+    name: copilot-orchestrator
+    description: Copilot SDK orchestrator for delegating work to specialist agents.
+    docker:
+      remoteBuild: true
+    container:
+      resources:
+        cpu: "1"
+        memory: 2Gi
+    protocols:
+      - protocol: invocations
+        version: 1.0.0

@@ -39,7 +39,8 @@ export function createSessionConfig(): SessionConfig {
   const model =
     modelBackend === "github"
       ? "auto"
-      : process.env.FOUNDRY_MODEL_NAME;
+      : process.env.FOUNDRY_MODEL_NAME ??
+        process.env.AZURE_AI_MODEL_DEPLOYMENT_NAME;
 
   if (!model) {
     throw new Error(

@@ -7,6 +7,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js",
+    "serve": "SERVE=true tsx src/main.ts",
     "dev": "tsx src/main.ts",
     "typecheck": "tsc --noEmit -p tsconfig.json"
   },

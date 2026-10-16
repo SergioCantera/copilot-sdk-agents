@@ -1,7 +1,18 @@
 import {createLocalAgent} from "./copilot.js";
+import {startServer} from "./server.js";
 
 const prompt = process.argv.slice(2).join(" ").trim();
-if (!prompt) {
+if (process.env.SERVE === "true") {
+  const running = await startServer();
+  console.log(`Foundry Invocations adapter listening on port ${running.port}`);
+
+  const shutdown = async () => {
+    await running.close();
+    process.exit(0);
+  };
+  process.once("SIGINT", shutdown);
+  process.once("SIGTERM", shutdown);
+} else if (!prompt) {
   console.error("Usage: npm run dev -- \"Ask the orchestrator a question\"");
   process.exitCode = 1;
 } else {

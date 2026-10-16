@@ -31,6 +31,43 @@ Copilot subscription associated with the local Copilot CLI.
 - Provider configuration isolated in `src/copilot.ts`
 - Non-interactive, single-request CLI entry point suitable for later hosting
 
+## Local Invocations adapter
+
+Phase 3 adds a local HTTP adapter using the Foundry Invocations contract owned
+by this project:
+
+```bash
+npm run serve
+```
+
+The server listens on `0.0.0.0:8080` by default and exposes:
+
+- `GET /health`
+- `GET /ready`
+- `GET /openapi.json`
+- `POST /invocations`
+
+Invoke it from another terminal:
+
+```bash
+curl -sS http://localhost:8080/invocations \
+  -H 'content-type: application/json' \
+  -d '{"message":"What is the weather in Paris?"}'
+```
+
+The response includes a `sessionId`. Send that value in a later request to
+reuse the same Copilot session:
+
+```json
+{
+  "message": "Now summarize the result.",
+  "sessionId": "<session-id>"
+}
+```
+
+The Invocations protocol is bytes-in/bytes-out; this project defines the JSON
+contract above and publishes it at `/openapi.json`.
+
 The local hook allowlist currently permits only `get_weather` as an application
 tool. MCP tools are configured separately and should be explicitly reviewed
 before being enabled.

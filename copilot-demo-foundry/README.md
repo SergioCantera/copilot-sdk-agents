@@ -1,6 +1,6 @@
 # Copilot Demo Foundry
 
-Phase 1 is a local TypeScript Copilot SDK orchestrator. It uses the signed-in
+This is a local TypeScript Copilot SDK orchestrator. It uses the signed-in
 GitHub Copilot CLI by default, while keeping a provider seam for a later
 Microsoft Foundry deployment.
 
@@ -20,13 +20,20 @@ npm run dev -- "What is the weather in Paris?"
 The local mode uses `MODEL_BACKEND=github` and therefore uses the normal
 Copilot subscription associated with the local Copilot CLI.
 
-## Phase 1 capabilities
+## Current capabilities
 
 - Copilot SDK agent loop
 - One demo `get_weather` tool
-- One `researcher` custom sub-agent
+- `researcher` and `weather-specialist` custom sub-agents
+- Repository skill in `skills/answering-weather-questions`
+- Optional HTTP/SSE MCP server configuration through `MCP_SERVER_URL`
+- Session hooks for prompt logging, tool allowlisting, MCP calls, failures, and session lifecycle
 - Provider configuration isolated in `src/copilot.ts`
 - Non-interactive, single-request CLI entry point suitable for later hosting
+
+The local hook allowlist currently permits only `get_weather` as an application
+tool. MCP tools are configured separately and should be explicitly reviewed
+before being enabled.
 
 ## Foundry provider seam
 

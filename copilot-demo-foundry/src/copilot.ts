@@ -5,6 +5,8 @@ import {
   type SessionConfig,
 } from "@github/copilot-sdk";
 import {customAgents} from "./agents.js";
+import {sessionHooks} from "./hooks.js";
+import {createMcpServers} from "./mcp.js";
 import {getWeather} from "./tools/weather.js";
 
 function createProvider(): ProviderConfig | undefined {
@@ -51,6 +53,9 @@ export function createSessionConfig(): SessionConfig {
     provider: createProvider(),
     tools: [getWeather],
     customAgents,
+    skillDirectories: ["skills"],
+    mcpServers: createMcpServers(),
+    hooks: sessionHooks,
     ...(modelBackend === "github"
       ? {onPermissionRequest: approveAll}
       : {}),

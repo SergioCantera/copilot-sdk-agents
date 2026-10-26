@@ -5,7 +5,7 @@ Examples and experiments built with the [GitHub Copilot SDK](https://github.com/
 This repository currently contains two standalone demos:
 
 - [`copilot-demo-node/`](./copilot-demo-node/) - An interactive terminal weather assistant that demonstrates streaming responses and a custom tool.
-- [`copilot-demo-foundry/`](./copilot-demo-foundry/) - A local Copilot SDK orchestrator with a provider seam for a future Microsoft Foundry deployment.
+- [`copilot-demo-foundry/`](./copilot-demo-foundry/) - A Copilot SDK orchestrator prepared for Microsoft Foundry hosting; domain-specific tools, skills, and agents are external resources rather than application code.
 
 Each demo has its own `package.json`, `package-lock.json`, dependencies, and run commands. Install dependencies from the demo directory you want to use.
 
@@ -35,9 +35,12 @@ What's the weather in Paris?
 
 Type `exit` to stop the session. See [`copilot-demo-node/README.md`](./copilot-demo-node/README.md) for details.
 
-## Demo: Foundry-ready orchestrator
+## Demo: Foundry orchestrator
 
-The Foundry demo is currently designed for local development with the signed-in GitHub Copilot CLI. It includes a `get_weather` tool, a custom `researcher` sub-agent, and an isolated provider configuration seam for future Microsoft Foundry hosting.
+The Foundry demo owns only the Copilot SDK agent loop and a Foundry
+Invocations-compatible HTTP adapter. It intentionally does not embed tools,
+skills, or custom sub-agents. Those capabilities can be added as separate
+Foundry resources and connected through external integrations such as MCP.
 
 ```bash
 cd copilot-demo-foundry
@@ -46,13 +49,17 @@ npm run typecheck
 npm run dev -- "What is the weather in Paris?"
 ```
 
-The local mode uses:
+Local development uses:
 
 ```text
 MODEL_BACKEND=github
 ```
 
-Future Foundry testing can be configured with the environment variables documented in [`copilot-demo-foundry/.env.example`](./copilot-demo-foundry/.env.example). Do not commit bearer tokens or other credentials. See [`copilot-demo-foundry/README.md`](./copilot-demo-foundry/README.md) for the current provider and hosting notes.
+Foundry testing can be configured with the environment variables documented in
+[`copilot-demo-foundry/.env.example`](./copilot-demo-foundry/.env.example).
+Do not commit bearer tokens or other credentials. See
+[`copilot-demo-foundry/README.md`](./copilot-demo-foundry/README.md) for the
+provider, resource-boundary, and hosting notes.
 
 ## Repository layout
 

@@ -1,8 +1,11 @@
 # Copilot Demo Foundry
 
-This is a local TypeScript Copilot SDK orchestrator. It uses the signed-in
-GitHub Copilot CLI by default, while keeping a provider seam for a later
-Microsoft Foundry deployment.
+This is a TypeScript Copilot SDK orchestrator prepared for Microsoft Foundry
+hosted-agent deployment. The application owns only the Copilot agent loop and
+the Foundry Invocations adapter. Domain-specific tools, skills, and specialist
+agents are intentionally not embedded in this repository; they can be managed
+as separate Foundry resources and exposed to the orchestrator through approved
+external integrations.
 
 ## Prerequisites
 
@@ -17,19 +20,27 @@ npm run typecheck
 npm run dev -- "What is the weather in Paris?"
 ```
 
-The local mode uses `MODEL_BACKEND=github` and therefore uses the normal
-Copilot subscription associated with the local Copilot CLI.
+Local development defaults to `MODEL_BACKEND=github` and therefore uses the
+normal Copilot subscription associated with the local Copilot CLI. This mode
+is only a development adapter; it is not the Foundry deployment configuration.
 
 ## Current capabilities
 
 - Copilot SDK agent loop
-- One demo `get_weather` tool
-- `researcher` and `weather-specialist` custom sub-agents
-- Repository skill in `skills/answering-weather-questions`
-- Optional HTTP/SSE MCP server configuration through `MCP_SERVER_URL`
-- Session hooks for prompt logging, tool allowlisting, MCP calls, failures, and session lifecycle
+- Optional external HTTP MCP server configuration through `MCP_SERVER_URL`
+- Session hooks for prompt logging, external tool calls, failures, and session lifecycle
 - Provider configuration isolated in `src/copilot.ts`
 - Non-interactive, single-request CLI entry point suitable for later hosting
+
+The session configuration does not register application tools, local skills, or
+custom sub-agents. External resources should be connected and governed outside
+the application. For example, an Azure Functions hosted skill can expose
+domain-specific reasoning and MCP tools as a separate resource:
+<https://learn.microsoft.com/en-us/azure/azure-functions/functions-hosted-skills>.
+
+When an external resource is exposed through an HTTP MCP endpoint for local
+testing, set `MCP_SERVER_URL` in the environment. The endpoint is not bundled
+with this project and its tools are not defined in TypeScript.
 
 ## Local Invocations adapter
 
@@ -76,24 +87,22 @@ Foundry hosted-agent deployment workflow:
 ```bash
 docker build -t copilot-demo-foundry:local .
 docker run --rm -p 8088:8088 \
-  -e MODEL_BACKEND=github \
+  -e MODEL_BACKEND=foundry \
+  -e FOUNDRY_MODEL_NAME=<deployment-name> \
+  -e FOUNDRY_MODEL_URL=<Foundry-model-endpoint> \
+  -e FOUNDRY_BEARER_TOKEN=<short-lived-token> \
   copilot-demo-foundry:local
 ```
 
-The container still requires a non-interactive Copilot authentication
-configuration at runtime. Do not copy a developer's local Copilot credentials
-into the image. The `azure.yaml` service is prepared for remote ACR builds, but
-Azure provisioning and deployment require a selected Foundry project and are
-not performed by this local phase.
-
-The local hook allowlist currently permits only `get_weather` as an application
-tool. MCP tools are configured separately and should be explicitly reviewed
-before being enabled.
+For local Docker testing, the container requires non-interactive authentication
+for the selected provider. Do not copy a developer's local Copilot credentials
+or bearer token into the image. The `azure.yaml` service is prepared for remote
+ACR builds, but Azure provisioning and deployment require a selected Foundry
+project and are not performed by this local phase.
 
 ## Foundry provider seam
 
-The application does not use Foundry during local development. The future
-Foundry mode is selected explicitly with:
+The Foundry provider is selected explicitly with:
 
 ```text
 MODEL_BACKEND=foundry
@@ -102,6 +111,21 @@ FOUNDRY_MODEL_URL=<Foundry-model-endpoint>
 FOUNDRY_BEARER_TOKEN=<short-lived-token>
 ```
 
-The bearer token is intentionally an environment input for this phase. The
-hosted deployment should replace it with a managed-identity
+The bearer token is an environment input for local or transitional testing
+only. A hosted deployment should replace it with a managed-identity
 `bearerTokenProvider` and should not use a developer's Copilot credentials.
+
+## Resource boundaries
+
+This project is the orchestrator runtime:
+
+- The Copilot SDK owns the model interaction loop.
+- The HTTP adapter implements the Foundry Invocations contract.
+- `MCP_SERVER_URL` is only an optional local integration seam.
+- Foundry owns the lifecycle and governance of external skills, tools, and
+  agents.
+
+The orchestrator does not automatically discover arbitrary Foundry resources.
+Those resources must be exposed through an integration supported by the
+deployment architecture, such as a configured MCP endpoint, and the resulting
+connection must be supplied to the hosted runtime.
